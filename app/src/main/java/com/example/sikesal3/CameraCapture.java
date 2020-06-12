@@ -11,6 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +25,9 @@ import com.camerakit.type.CameraSize;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jpegkit.Jpeg;
 import com.jpegkit.JpegImageView;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 
 /**
@@ -57,7 +61,7 @@ public class CameraCapture extends DialogFragment  {
     }
 
     public interface OnInputListener {
-        void onSimpanClick(Jpeg data);
+        void onSimpanClick(Jpeg data, File file);
     }
     public OnInputListener onInputListener;
 
@@ -194,7 +198,15 @@ public class CameraCapture extends DialogFragment  {
                                 @Override
                                 public void run() {
                                    // imageView.setJpeg(jpeg);
-                                    onInputListener.onSimpanClick(jpeg);
+                                    File savedPhoto = new File(Environment.getExternalStorageDirectory(), "photo.jpg");
+                                    try {
+                                        FileOutputStream outputStream = new FileOutputStream(savedPhoto.getPath());
+                                        outputStream.write(photo);
+                                        outputStream.close();
+                                    } catch (java.io.IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    onInputListener.onSimpanClick(jpeg, savedPhoto);
                                     getDialog().cancel();
                                 }
                             });

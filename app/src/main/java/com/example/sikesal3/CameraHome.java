@@ -4,12 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import com.jpegkit.Jpeg;
 import com.jpegkit.JpegImageView;
+
+import java.io.File;
 
 public class CameraHome extends AppCompatActivity implements CameraCapture.OnInputListener {
     Button btn;
@@ -36,7 +39,8 @@ public class CameraHome extends AppCompatActivity implements CameraCapture.OnInp
 
 
     @Override
-    public void onSimpanClick(Jpeg data) {
+    public void onSimpanClick(Jpeg data, File file) {
         imageView.setJpeg(data);
+        Log.i("file", "onSimpanClick: "+file.getName());
     }
 }
