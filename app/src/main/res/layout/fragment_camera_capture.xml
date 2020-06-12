@@ -23,7 +23,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="500dp">
 
             <com.camerakit.CameraKitView
                 android:id="@+id/camera"
@@ -43,15 +43,6 @@
                 android:layout_gravity="center"
                 android:text="Approve Permissions"
                 android:visibility="gone" />
-
-            <com.jpegkit.JpegImageView
-                android:id="@+id/imageView"
-                android:layout_width="108dp"
-                android:layout_height="192dp"
-                android:layout_gravity="top|center_horizontal"
-                android:layout_margin="16dp"
-                android:alpha="1.0"
-                android:scaleType="centerInside" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -147,7 +138,7 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/photoButton"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_marginBottom="12dp"

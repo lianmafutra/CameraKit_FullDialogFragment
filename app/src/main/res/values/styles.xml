@@ -10,4 +10,9 @@
 
     <style name="FullscreenDialogTheme" parent="Theme.AppCompat.Light.DialogWhenLarge">
     </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_from_left</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_to_right</item>
+    </style>
 </resources>

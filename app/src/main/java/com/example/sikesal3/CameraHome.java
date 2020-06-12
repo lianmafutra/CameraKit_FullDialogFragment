@@ -42,10 +42,10 @@ public class CameraHome extends AppCompatActivity implements CameraCapture.OnInp
 
 
     @Override
-    public void onSimpanClick(Jpeg data, File file) {
+    public void camerakitData(Jpeg data, File file) {
         imageView.setJpeg(data);
         txt_file.setText("File = "+file.getName()+"");
         btn.setText("Ambil Ulang Gambar");
-        Log.i("file", "onSimpanClick: "+file.getName());
+        Log.i("file", "onSimpanClick: "+file.length()/1024+"Kb");
     }
 }

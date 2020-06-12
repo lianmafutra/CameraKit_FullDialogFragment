@@ -1,18 +1,17 @@
 package com.example.sikesal3;
 
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,10 +20,8 @@ import android.widget.Button;
 
 import com.camerakit.CameraKit;
 import com.camerakit.CameraKitView;
-import com.camerakit.type.CameraSize;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jpegkit.Jpeg;
-import com.jpegkit.JpegImageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,10 +36,6 @@ public class CameraCapture extends DialogFragment  {
     private CameraKitView cameraView;
     private Toolbar toolbar;
 
-    private AppCompatTextView facingText;
-    private AppCompatTextView flashText;
-    private AppCompatTextView previewSizeText;
-    private AppCompatTextView photoSizeText;
 
     private Button flashOnButton;
     private Button flashOffButton;
@@ -54,14 +47,14 @@ public class CameraCapture extends DialogFragment  {
 
     private Button permissionsButton;
 
-    private JpegImageView imageView;
+
 
     public CameraCapture() {
         // Required empty public constructor
     }
 
     public interface OnInputListener {
-        void onSimpanClick(Jpeg data, File file);
+        void camerakitData(Jpeg data, File file);
     }
     public OnInputListener onInputListener;
 
@@ -74,11 +67,6 @@ public class CameraCapture extends DialogFragment  {
         cameraView = view.findViewById(R.id.camera);
 
         toolbar = view.findViewById(R.id.toolbar);
-
-        facingText = view.findViewById(R.id.facingText);
-        flashText = view.findViewById(R.id.flashText);
-        previewSizeText = view.findViewById(R.id.previewSizeText);
-        photoSizeText = view.findViewById(R.id.photoSizeText);
 
         photoButton = view.findViewById(R.id.photoButton);
         photoButton.setOnClickListener(photoOnClickListener);
@@ -103,7 +91,7 @@ public class CameraCapture extends DialogFragment  {
             }
         });
 
-        imageView = view.findViewById(R.id.imageView);
+
 
         cameraView.setPermissionsListener(new CameraKitView.PermissionsListener() {
             @Override
@@ -133,7 +121,6 @@ public class CameraCapture extends DialogFragment  {
             @Override
             public void onStart() {
                 Log.v("CameraKitView", "PreviewListener: onStart()");
-                updateInfoText();
             }
 
             @Override
@@ -148,8 +135,8 @@ public class CameraCapture extends DialogFragment  {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
-    }
 
+    }
 
 
 
@@ -157,6 +144,8 @@ public class CameraCapture extends DialogFragment  {
     public void onStart() {
         super.onStart();
         cameraView.onStart();
+        getDialog().getWindow().setWindowAnimations(
+                R.style.DialogAnimation);
     }
 
     @Override
@@ -190,28 +179,19 @@ public class CameraCapture extends DialogFragment  {
             cameraView.captureImage(new CameraKitView.ImageCallback() {
                 @Override
                 public void onImage(CameraKitView view, final byte[] photo) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            final Jpeg jpeg = new Jpeg(photo);
-                            imageView.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                   // imageView.setJpeg(jpeg);
-                                    File savedPhoto = new File(Environment.getExternalStorageDirectory(), "photo.jpg");
-                                    try {
-                                        FileOutputStream outputStream = new FileOutputStream(savedPhoto.getPath());
-                                        outputStream.write(photo);
-                                        outputStream.close();
-                                    } catch (java.io.IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                    onInputListener.onSimpanClick(jpeg, savedPhoto);
-                                    getDialog().cancel();
-                                }
-                            });
-                        }
-                    }).start();
+                    final Jpeg jpeg = new Jpeg(photo);
+                    File savedPhoto = new File(Environment.getExternalStorageDirectory(), "photo.jpg");
+                    try {
+                        FileOutputStream outputStream = new FileOutputStream(savedPhoto.getPath());
+                        outputStream.write(jpeg.getJpegBytes());
+                        outputStream.close();
+                        onInputListener.camerakitData(jpeg, savedPhoto);
+                        getDialog().cancel();
+                        Log.i("camerakit_log", "onImage: "+savedPhoto.length()/1024+" Kb" );
+                    } catch (java.io.IOException e) {
+                        e.printStackTrace();
+                    }
+
                 }
             });
         }
@@ -222,7 +202,7 @@ public class CameraCapture extends DialogFragment  {
         public void onClick(View v) {
             if (cameraView.getFlash() != CameraKit.FLASH_ON) {
                 cameraView.setFlash(CameraKit.FLASH_ON);
-                updateInfoText();
+
             }
         }
     };
@@ -232,7 +212,7 @@ public class CameraCapture extends DialogFragment  {
         public void onClick(View v) {
             if (cameraView.getFlash() != CameraKit.FLASH_OFF) {
                 cameraView.setFlash(CameraKit.FLASH_OFF);
-                updateInfoText();
+
             }
         }
     };
@@ -250,45 +230,6 @@ public class CameraCapture extends DialogFragment  {
             cameraView.setFacing(CameraKit.FACING_BACK);
         }
     };
-
-    private void updateInfoText() {
-        String facingValue = cameraView.getFacing() == CameraKit.FACING_BACK ? "BACK" : "FRONT";
-        facingText.setText(Html.fromHtml("<b>Facing:</b> " + facingValue));
-
-        String flashValue = "OFF";
-        switch (cameraView.getFlash()) {
-            case CameraKit.FLASH_OFF: {
-                flashValue = "OFF";
-                break;
-            }
-
-            case CameraKit.FLASH_ON: {
-                flashValue = "ON";
-                break;
-            }
-
-            case CameraKit.FLASH_AUTO: {
-                flashValue = "AUTO";
-                break;
-            }
-
-            case CameraKit.FLASH_TORCH: {
-                flashValue = "TORCH";
-                break;
-            }
-        }
-        flashText.setText(Html.fromHtml("<b>Flash:</b> " + flashValue));
-
-        CameraSize previewSize = cameraView.getPreviewResolution();
-        if (previewSize != null) {
-            previewSizeText.setText(Html.fromHtml(String.format("<b>Preview Resolution:</b> %d x %d", previewSize.getWidth(), previewSize.getHeight())));
-        }
-
-        CameraSize photoSize = cameraView.getPhotoResolution();
-        if (photoSize != null) {
-            photoSizeText.setText(Html.fromHtml(String.format("<b>Photo Resolution:</b> %d x %d", photoSize.getWidth(), photoSize.getHeight())));
-        }
-    }
 
 
     @Override
